@@ -1,37 +1,37 @@
 import gradio as gr
-
 from analysis.queries import load_top_tracks, top_streamed
 from analysis.charts import streams_bar_chart
 
 
 def analyze_dataset(csv_file):
+    try:
+        if csv_file is None:
+            raise ValueError("Please upload a CSV.")
 
-    if csv_file is None:
-        raise gr.Error("Please upload a CSV")
+        file_path = csv_file if isinstance(csv_file, str) else csv_file.name
+        print("file_path:", file_path)
 
-    file_path = csv_file if isinstance(csv_file, str) else csv_file.name
+        df = load_top_tracks(file_path)
+        print("columns:", list(df.columns))
 
-    df = load_top_tracks(file_path)
+        top_df = top_streamed(df)
+        fig = streams_bar_chart(top_df)
 
-    top_df = top_streamed(df)
+        return top_df, fig
 
-    fig = streams_bar_chart(top_df)
-
-    return top_df, fig
+    except Exception as e:
+        print("ERROR:", repr(e))
+        raise gr.Error(str(e))
 
 
 def build_interface():
-
     with gr.Blocks() as demo:
-
         gr.Markdown("# 🎵 Music Stream Analyzer")
 
         file_input = gr.File(label="Upload CSV", type="filepath")
-
         run_button = gr.Button("Run Analysis")
 
         table_output = gr.Dataframe()
-
         chart_output = gr.Plot()
 
         run_button.click(
