@@ -3,15 +3,14 @@ from analysis.queries import load_top_tracks, top_streamed
 from analysis.charts import streams_bar_chart
 
 
-def analyze_dataset(csv_file):
+DATA_PATH = "data/processed/top50_global.csv"   # adjust to your actual dataset path
+
+
+def analyze_dataset():
     try:
-        if csv_file is None:
-            raise ValueError("Please upload a CSV.")
+        print("Loading dataset from:", DATA_PATH)
 
-        file_path = csv_file if isinstance(csv_file, str) else csv_file.name
-        print("file_path:", file_path)
-
-        df = load_top_tracks(file_path)
+        df = load_top_tracks(DATA_PATH)
         print("columns:", list(df.columns))
 
         top_df = top_streamed(df)
@@ -28,7 +27,6 @@ def build_interface():
     with gr.Blocks() as demo:
         gr.Markdown("# 🎵 Music Stream Analyzer")
 
-        file_input = gr.File(label="Upload CSV", type="filepath")
         run_button = gr.Button("Run Analysis")
 
         table_output = gr.Dataframe()
@@ -36,7 +34,7 @@ def build_interface():
 
         run_button.click(
             analyze_dataset,
-            inputs=file_input,
+            inputs=None,
             outputs=[table_output, chart_output]
         )
 
